@@ -63,14 +63,14 @@ namespace Microsoft.Exchange.WebServices.Data
         /// <returns>An XML reader to use.</returns>
         protected virtual XmlReader InitializeXmlReader(Stream stream)
         {
-            // The ProhibitDtd property is used to indicate whether XmlReader should process DTDs or not. By default, 
+            // The ProhibitDtd property is used to indicate whether XmlReader should process DTDs or not. By default,
             // it will do so. EWS doesn't use DTD references so we want to turn this off. Also, the XmlResolver property is
-            // set to an instance of XmlUrlResolver by default. We don't want XmlTextReader to try to resolve this DTD reference 
+            // set to an instance of XmlUrlResolver by default. We don't want XmlTextReader to try to resolve this DTD reference
             // so we disable the XmlResolver as well.
             XmlReaderSettings settings = new XmlReaderSettings()
             {
                 ConformanceLevel = ConformanceLevel.Auto,
-                ProhibitDtd = true,
+                DtdProcessing = DtdProcessing.Prohibit,
                 IgnoreComments = true,
                 IgnoreProcessingInstructions = true,
                 IgnoreWhitespace = true,
@@ -165,8 +165,8 @@ namespace Microsoft.Exchange.WebServices.Data
         {
             this.prevNodeType = this.xmlReader.NodeType;
 
-            // XmlReader.Read returns true if the next node was read successfully; false if there 
-            // are no more nodes to read. The caller to EwsXmlReader.Read expects that there's another node to 
+            // XmlReader.Read returns true if the next node was read successfully; false if there
+            // are no more nodes to read. The caller to EwsXmlReader.Read expects that there's another node to
             // read. Throw an exception if not true.
             bool nodeRead = this.xmlReader.Read();
             if (!nodeRead)
@@ -422,7 +422,7 @@ namespace Microsoft.Exchange.WebServices.Data
                     }
                 }
                 while (bytesRead > 0);
-               
+
                 // Can use MemoryStream.GetBuffer() if the buffer's capacity and the number of bytes read
                 // are identical. Otherwise need to convert to byte array that's the size of the number of bytes read.
                 return (memoryStream.Length == memoryStream.Capacity) ? memoryStream.GetBuffer() : memoryStream.ToArray();
@@ -753,7 +753,7 @@ namespace Microsoft.Exchange.WebServices.Data
         {
             this.xmlReader.ReadToDescendant(localName, EwsUtilities.GetNamespaceUri(xmlNamespace));
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether this instance has attributes.
         /// </summary>

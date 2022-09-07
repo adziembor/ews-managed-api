@@ -31,7 +31,6 @@ namespace Microsoft.Exchange.WebServices.Data
     using System.Net;
     using System.Reflection;
     using System.Text;
-    using System.Web.Services.Protocols;
     using System.Xml;
 
     /// <summary>
@@ -77,7 +76,7 @@ namespace Microsoft.Exchange.WebServices.Data
         private int positionWithinLine;
 
         /// <summary>
-        /// Dictionary of key/value pairs from the MessageXml node in the fault. Usually empty but there are 
+        /// Dictionary of key/value pairs from the MessageXml node in the fault. Usually empty but there are
         /// a few cases where SOAP faults may include MessageXml details (e.g. CASOverBudgetException includes
         /// BackoffTime value).
         /// </summary>

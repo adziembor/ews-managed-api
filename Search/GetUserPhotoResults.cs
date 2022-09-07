@@ -29,6 +29,7 @@ namespace Microsoft.Exchange.WebServices.Data
     using System.Collections.ObjectModel;
     using System.Drawing;
     using System.IO;
+    using System.Runtime.InteropServices;
     using Microsoft.Exchange.WebServices.Data.Enumerations;
 
     /// <summary>
@@ -79,11 +80,11 @@ namespace Microsoft.Exchange.WebServices.Data
                 throw new InvalidOperationException("Cannot create image when no photo data returned.");
             }
 
-            Image img;
-            using (MemoryStream stream = new MemoryStream(this.Photo))
-            {
-                img = Image.FromStream(stream);
-            }
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new PlatformNotSupportedException("This can be done only on windows");
+
+            using var stream = new MemoryStream(this.Photo);
+            var img = Image.FromStream(stream);
 
             return img;
         }

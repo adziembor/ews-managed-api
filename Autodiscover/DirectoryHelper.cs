@@ -31,11 +31,13 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
     using System.DirectoryServices;
     using System.DirectoryServices.ActiveDirectory;
     using System.Runtime.InteropServices;
+    using System.Runtime.Versioning;
     using Microsoft.Exchange.WebServices.Data;
 
     /// <summary>
     /// Represents a set of helper methods for using Active Directory services.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal class DirectoryHelper
     {
         #region Static members
@@ -267,7 +269,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                             {
                                 bool hasSiteKeyword = false;
 
-                                // Check if SCP URL entry has any keyword starting with "Site=" 
+                                // Check if SCP URL entry has any keyword starting with "Site="
                                 foreach (string keyword in entryKeywords)
                                 {
                                     hasSiteKeyword |= keyword.StartsWith(sitePrefix, StringComparison.OrdinalIgnoreCase);

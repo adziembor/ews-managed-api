@@ -242,12 +242,6 @@ namespace Microsoft.Exchange.WebServices.Data
                     this.Disconnect(HangingRequestDisconnectReason.Exception, ex);
                     return;
                 }
-                catch (HttpException ex)
-                {
-                    // Stream is closed, so disconnect.
-                    this.Disconnect(HangingRequestDisconnectReason.Exception, ex);
-                    return;
-                }
                 catch (WebException ex)
                 {
                     // Stream is closed, so disconnect.
@@ -326,7 +320,7 @@ namespace Microsoft.Exchange.WebServices.Data
         }
 
         /// <summary>
-        /// Perform any bookkeeping needed when we connect 
+        /// Perform any bookkeeping needed when we connect
         /// </summary>
         private void InternalOnConnect()
         {

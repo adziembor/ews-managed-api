@@ -30,6 +30,8 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Runtime.InteropServices;
+    using System.Runtime.Versioning;
     using System.Text.RegularExpressions;
     using System.Xml;
     using Microsoft.Exchange.WebServices.Data;
@@ -229,7 +231,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 using (Stream responseStream = webResponse.GetResponseStream())
                 {
                     // If tracing is enabled, we read the entire response into a MemoryStream so that we
-                    // can pass it along to the ITraceListener. Then we parse the response from the 
+                    // can pass it along to the ITraceListener. Then we parse the response from the
                     // MemoryStream.
                     if (this.IsTraceEnabledFor(TraceFlags.AutodiscoverResponse))
                     {
@@ -308,7 +310,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                     TraceFlags.AutodiscoverConfiguration,
                     string.Format("Request error: {0}", ex.Message));
 
-                // The exception response factory requires a valid HttpWebResponse, 
+                // The exception response factory requires a valid HttpWebResponse,
                 // but there will be no web response if the web request couldn't be
                 // actually be issued (e.g. due to DNS error).
                 if (ex.Response != null)
@@ -452,7 +454,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 throw new ServiceValidationException(Strings.AutodiscoverServiceRequestRequiresDomainOrUrl);
             }
 
-            // Assume caller is not inside the Intranet, regardless of whether SCP Urls 
+            // Assume caller is not inside the Intranet, regardless of whether SCP Urls
             // were returned or not. SCP Urls are only relevant if one of them returns
             // valid Autodiscover settings.
             this.isExternal = true;
@@ -601,9 +603,9 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             }
             while (currentUrlIndex < urls.Count);
 
-            // If we got this far it's because none of the URLs we tried have worked. As a next-to-last chance, use GetRedirectUrl to 
-            // try to get a redirection URL using an HTTP GET on a non-SSL Autodiscover endpoint. If successful, use this 
-            // redirection URL to get the configuration settings for this email address. (This will be a common scenario for 
+            // If we got this far it's because none of the URLs we tried have worked. As a next-to-last chance, use GetRedirectUrl to
+            // try to get a redirection URL using an HTTP GET on a non-SSL Autodiscover endpoint. If successful, use this
+            // redirection URL to get the configuration settings for this email address. (This will be a common scenario for
             // DataCenter deployments).
             Uri redirectionUrl = this.GetRedirectUrl(domainName);
             if ((redirectionUrl != null) &&
@@ -686,8 +688,8 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
 
             List<string> redirectionEmailAddresses = new List<string>();
 
-            // Bug 60274: Performing a non-SSL HTTP GET to retrieve a redirection URL is potentially unsafe. We allow the caller 
-            // to specify delegate to be called to determine whether we are allowed to use the redirection URL. 
+            // Bug 60274: Performing a non-SSL HTTP GET to retrieve a redirection URL is potentially unsafe. We allow the caller
+            // to specify delegate to be called to determine whether we are allowed to use the redirection URL.
             if (this.CallRedirectionUrlValidationCallback(redirectionUrl.ToString()))
             {
                 for (int currentHop = 0; currentHop < AutodiscoverService.AutodiscoverMaxRedirections; currentHop++)
@@ -895,7 +897,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 settings,
                 null,
                 this.InternalGetUserSettings,
-                delegate() { return EwsUtilities.DomainFromEmailAddress(smtpAddresses[0]); });
+                delegate () { return EwsUtilities.DomainFromEmailAddress(smtpAddresses[0]); });
         }
 
         /// <summary>
@@ -960,7 +962,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             // No Url or Domain specified, need to figure out which endpoint(s) to try.
             else
             {
-                // Assume caller is not inside the Intranet, regardless of whether SCP Urls 
+                // Assume caller is not inside the Intranet, regardless of whether SCP Urls
                 // were returned or not. SCP Urls are only relevent if one of them returns
                 // valid Autodiscover settings.
                 this.IsExternal = true;
@@ -1070,7 +1072,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             ExchangeVersion? requestedVersion,
             ref Uri autodiscoverUrl)
         {
-            // The response to GetUserSettings can be a redirection. Execute GetUserSettings until we get back 
+            // The response to GetUserSettings can be a redirection. Execute GetUserSettings until we get back
             // a valid response or we've followed too many redirections.
             for (int currentHop = 0; currentHop < AutodiscoverService.AutodiscoverMaxRedirections; currentHop++)
             {
@@ -1123,7 +1125,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 settings,
                 requestedVersion,
                 this.InternalGetDomainSettings,
-                delegate() { return domains[0]; });
+                delegate () { return domains[0]; });
         }
 
         /// <summary>
@@ -1140,7 +1142,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             ExchangeVersion? requestedVersion,
             ref Uri autodiscoverUrl)
         {
-            // The response to GetDomainSettings can be a redirection. Execute GetDomainSettings until we get back 
+            // The response to GetDomainSettings can be a redirection. Execute GetDomainSettings until we get back
             // a valid response or we've followed too many redirections.
             for (int currentHop = 0; currentHop < AutodiscoverService.AutodiscoverMaxRedirections; currentHop++)
             {
@@ -1265,7 +1267,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 else if (this.Credentials is OAuthCredentials)
                 {
                     // If the credential is OAuthCredentials, no matter whether we have
-                    // the corresponding x-header, we will go with OAuth. 
+                    // the corresponding x-header, we will go with OAuth.
                     url = new Uri(string.Format(AutodiscoverSoapHttpsUrl, host));
                 }
 
@@ -1286,6 +1288,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
         /// </summary>
         /// <param name="domainName">Name of the domain.</param>
         /// <returns></returns>
+        [SupportedOSPlatform("windows")]
         private ICollection<string> DefaultGetScpUrlsForDomain(string domainName)
         {
             DirectoryHelper helper = new DirectoryHelper(this);
@@ -1305,7 +1308,18 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             if (this.enableScpLookup)
             {
                 // Get SCP URLs
-                Func<string, ICollection<string>> callback = this.GetScpUrlsForDomainCallback ?? this.DefaultGetScpUrlsForDomain;
+                Func<string, ICollection<string>> callback;
+                if (this.GetScpUrlsForDomainCallback != null)
+                {
+                    callback = this.GetScpUrlsForDomainCallback;
+                }
+                else
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        callback = this.DefaultGetScpUrlsForDomain;
+                    else
+                        throw new PlatformNotSupportedException("DefaultGetScpUrlsForDomain is only supported on windows");
+                }
                 ICollection<string> scpUrls = callback(domainName);
                 foreach (string str in scpUrls)
                 {
@@ -1335,7 +1349,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             {
                 serviceHosts.Add(url.Host);
             }
-            
+
             return serviceHosts;
         }
 
@@ -1378,7 +1392,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                         TraceFlags.AutodiscoverConfiguration,
                         string.Format("Request error: {0}", ex.Message));
 
-                    // The exception response factory requires a valid HttpWebResponse, 
+                    // The exception response factory requires a valid HttpWebResponse,
                     // but there will be no web response if the web request couldn't be
                     // actually be issued (e.g. due to DNS error).
                     if (ex.Response != null)
@@ -1755,7 +1769,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             EwsUtilities.ValidateNonBlankStringParam(targetTenantDomain, "targetTenantDomain");
 
             // the user should set the url to its own tenant's autodiscover url.
-            // 
+            //
             if (this.Url == null)
             {
                 throw new ServiceValidationException(Strings.PartnerTokenRequestRequiresUrl);

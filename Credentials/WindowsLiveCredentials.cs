@@ -48,7 +48,7 @@ namespace Microsoft.Exchange.WebServices.Data
 
         // Windows Live SOAP namespace prefix (which is S: instead of soap:)
         internal const string WindowsLiveSoapNamespacePrefix = "S";
-        
+
         // XML element names used in RSTR responses from Windows Live
         internal const string RequestSecurityTokenResponseCollectionElementName = "RequestSecurityTokenResponseCollection";
         internal const string RequestSecurityTokenResponseElementName = "RequestSecurityTokenResponse";
@@ -58,7 +58,7 @@ namespace Microsoft.Exchange.WebServices.Data
 
         // The reqstatus we should receive from Windows Live.
         internal const string SuccessfulReqstatus = "0x0";
-        
+
         // The default Windows Live URL.
         internal static readonly Uri DefaultWindowsLiveUrl = new Uri("https://login.live.com/rst2.srf");
 
@@ -80,7 +80,7 @@ namespace Microsoft.Exchange.WebServices.Data
             {
                 throw new ArgumentNullException("password");
             }
-            
+
             this.windowsLiveId = windowsLiveId;
             this.password = password;
             this.windowsLiveUrl = WindowsLiveCredentials.DefaultWindowsLiveUrl;
@@ -92,11 +92,11 @@ namespace Microsoft.Exchange.WebServices.Data
         public bool TraceEnabled
         {
             get
-            { 
+            {
                 return this.traceEnabled;
             }
 
-            set 
+            set
             {
                 this.traceEnabled = value;
                 if (this.traceEnabled && (this.traceListener == null))
@@ -142,7 +142,7 @@ namespace Microsoft.Exchange.WebServices.Data
                 this.windowsLiveUrl = value;
             }
         }
-        
+
         /// <summary>
         /// This method is called to apply credentials to a service request before the request is made.
         /// </summary>
@@ -230,7 +230,7 @@ namespace Microsoft.Exchange.WebServices.Data
                 "    </ps:RequestMultipleSecurityTokens>" +
                 "  </s:Body>" +
                 "</s:Envelope>";
-            
+
             // Create a security timestamp valid for 5 minutes to send with the request.
             DateTime now = DateTime.UtcNow;
             SecurityTimestamp securityTimestamp = new SecurityTimestamp(now, now.AddMinutes(5), "Timestamp");
@@ -246,8 +246,11 @@ namespace Microsoft.Exchange.WebServices.Data
                 uriForTokenEndpointReference.ToString());
 
             // Create and send the request.
-            HttpWebRequest webRequest = (HttpWebRequest) HttpWebRequest.Create(this.windowsLiveUrl);
-            
+#pragma warning disable SYSLIB0014 // Type or member is obsolete
+            // but changing this would require more work
+            HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(this.windowsLiveUrl);
+#pragma warning restore SYSLIB0014 // Type or member is obsolete
+
             webRequest.Method = "POST";
             webRequest.ContentType = "text/xml; charset=utf-8";
             byte[] requestBytes = Encoding.UTF8.GetBytes(requestToSend);
@@ -259,7 +262,7 @@ namespace Microsoft.Exchange.WebServices.Data
             {
                 requestStream.Write(requestBytes, 0, requestBytes.Length);
             }
-            
+
             return (HttpWebResponse)webRequest.GetResponse();
         }
 
@@ -274,13 +277,13 @@ namespace Microsoft.Exchange.WebServices.Data
                 memoryStream != null,
                 "WindowsLiveCredentials.TraceResponse",
                 "memoryStream cannot be null");
-            
+
             if (!this.TraceEnabled)
             {
                 return;
             }
-            
-            if (!string.IsNullOrEmpty(response.ContentType) && 
+
+            if (!string.IsNullOrEmpty(response.ContentType) &&
                 (response.ContentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase) ||
                  response.ContentType.StartsWith("application/soap", StringComparison.OrdinalIgnoreCase)))
             {
@@ -312,7 +315,7 @@ namespace Microsoft.Exchange.WebServices.Data
             }
 
             // If tracing is enabled, we read the entire response into a MemoryStream so that we
-            // can pass it along to the ITraceListener. Then we parse the response from the 
+            // can pass it along to the ITraceListener. Then we parse the response from the
             // MemoryStream.
             if (this.TraceEnabled)
             {
@@ -325,11 +328,11 @@ namespace Microsoft.Exchange.WebServices.Data
                         memoryStream.Position = 0;
                     }
 
-                    this.TraceResponse((HttpWebResponse) e.Response, memoryStream);
+                    this.TraceResponse((HttpWebResponse)e.Response, memoryStream);
                 }
             }
         }
-        
+
         /// <summary>
         /// Makes a request to Windows Live to get a token.
         /// </summary>
@@ -363,7 +366,7 @@ namespace Microsoft.Exchange.WebServices.Data
                             traceString);
                     }
                 }
-                
+
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, e.Message), e);
             }
 
@@ -383,7 +386,7 @@ namespace Microsoft.Exchange.WebServices.Data
                         "WindowsLiveCredentials",
                         traceString);
                 }
-                
+
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, e.Message), e);
             }
         }
@@ -412,10 +415,10 @@ namespace Microsoft.Exchange.WebServices.Data
                         "WindowsLiveResponse",
                         "Could not find Passport SOAP fault information in Windows Live response");
                 }
-                
+
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, PpElementName));
             }
-            
+
             // Now that we've found the psf:pp element, look for the 'reqstatus' element under it.  If after
             // the ReadToDescendant call we're at the end element for the psf:pp element, we didn't find it.
             rstResponse.ReadToDescendant(XmlNamespace.PassportSoapFault, ReqstatusElementName);
@@ -431,17 +434,17 @@ namespace Microsoft.Exchange.WebServices.Data
                 }
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, ReqstatusElementName));
             }
-            
+
             // Now that we've found the reqstatus element, get its value.
             string reqstatus = rstResponse.ReadElementValue();
 
-            // Read to body tag in both success and failure cases, 
+            // Read to body tag in both success and failure cases,
             // since we need to trace the fault response in failure cases
             while (!rstResponse.IsEndElement(WindowsLiveSoapNamespacePrefix, XmlElementNames.SOAPHeaderElementName))
             {
                 rstResponse.Read();
             }
-            
+
             if (!string.Equals(reqstatus, SuccessfulReqstatus))
             {
                 // Our request status was non-zero - something went wrong.  Trace and throw.
@@ -463,8 +466,8 @@ namespace Microsoft.Exchange.WebServices.Data
                            string.Format(
                            "Windows Live reported Fault : {0}",
                            rstResponse.ReadInnerXml()));
-                }               
-                
+                }
+
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, ReqstatusElementName + ": " + reqstatus));
             }
         }
@@ -534,11 +537,11 @@ namespace Microsoft.Exchange.WebServices.Data
                 }
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, "No security token found."));
             }
-            
+
             // Read past the RequestSecurityTokenResponseCollection end element.
             rstResponse.Read();
         }
-        
+
         /// <summary>
         /// Grabs the issued token information out of a response from Windows Live.
         /// </summary>
@@ -546,7 +549,7 @@ namespace Microsoft.Exchange.WebServices.Data
         private void ProcessTokenResponse(HttpWebResponse response)
         {
             // NOTE: We're not tracing responses here because they contain the actual token information
-            // from Windows Live.    
+            // from Windows Live.
             using (Stream responseStream = response.GetResponseStream())
             {
                 // Always start fresh (nulls in all the data we're going to fill in).

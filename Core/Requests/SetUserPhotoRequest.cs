@@ -155,7 +155,7 @@ namespace Microsoft.Exchange.WebServices.Data
             return SetUserPhotoRequest.SetResultOrDefault(this.InternalExecute);
         }
 
-                /// <summary>
+        /// <summary>
         /// Ends executing this async request.
         /// </summary>
         /// <param name="asyncResult">The async result</param>
@@ -171,7 +171,7 @@ namespace Microsoft.Exchange.WebServices.Data
             {
                 return (SetUserPhotoResponse)serviceResponseFactory();
             }
-            catch (ServiceRequestException ex)
+            catch (ServiceRequestException)
             {
                 throw;
             }

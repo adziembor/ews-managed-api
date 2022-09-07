@@ -33,12 +33,12 @@ namespace Microsoft.Exchange.WebServices.Data
     using System.Xml;
 
     /// <summary>
-    /// Represents an xml reader used by the ExchangeService to parse multi-response streams, 
-    /// such as GetStreamingEvents. 
+    /// Represents an xml reader used by the ExchangeService to parse multi-response streams,
+    /// such as GetStreamingEvents.
     /// </summary>
     /// <remarks>
-    /// Necessary because the basic EwsServiceXmlReader does not 
-    /// use normalization, and in order to turn normalization off, it is 
+    /// Necessary because the basic EwsServiceXmlReader does not
+    /// use normalization, and in order to turn normalization off, it is
     /// necessary to use an XmlTextReader, which does not allow the ConformanceLevel.Auto that
     /// a multi-response stream requires.
     /// If ever there comes a time we need to deal with multi-response streams with user-generated
@@ -79,14 +79,14 @@ namespace Microsoft.Exchange.WebServices.Data
         /// <returns>An XML reader to use.</returns>
         private static XmlReader CreateXmlReader(Stream stream)
         {
-            // The ProhibitDtd property is used to indicate whether XmlReader should process DTDs or not. By default, 
+            // The ProhibitDtd property is used to indicate whether XmlReader should process DTDs or not. By default,
             // it will do so. EWS doesn't use DTD references so we want to turn this off. Also, the XmlResolver property is
-            // set to an instance of XmlUrlResolver by default. We don't want XmlTextReader to try to resolve this DTD reference 
+            // set to an instance of XmlUrlResolver by default. We don't want XmlTextReader to try to resolve this DTD reference
             // so we disable the XmlResolver as well.
             XmlReaderSettings settings = new XmlReaderSettings()
             {
                 ConformanceLevel = ConformanceLevel.Auto,
-                ProhibitDtd = true,
+                DtdProcessing = DtdProcessing.Prohibit,
                 IgnoreComments = true,
                 IgnoreProcessingInstructions = true,
                 IgnoreWhitespace = true,

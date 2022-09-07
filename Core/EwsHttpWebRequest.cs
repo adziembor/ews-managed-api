@@ -47,7 +47,10 @@ namespace Microsoft.Exchange.WebServices.Data
         /// <param name="uri">The URI.</param>
         internal EwsHttpWebRequest(Uri uri)
         {
+#pragma warning disable SYSLIB0014 // Type or member is obsolete
+            // but changing this would require more work
             this.request = (HttpWebRequest)WebRequest.Create(uri);
+#pragma warning restore SYSLIB0014 // Type or member is obsolete
         }
 
         #region IEwsHttpWebRequest Members
@@ -285,7 +288,7 @@ namespace Microsoft.Exchange.WebServices.Data
         }
 
         /// <summary>
-        /// Gets or sets the name of the connection group for the request. 
+        /// Gets or sets the name of the connection group for the request.
         /// </summary>
         public string ConnectionGroupName
         {
